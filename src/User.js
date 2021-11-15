@@ -37,7 +37,7 @@ function  User() {
 
     useEffect(() => {
         getUser();
-    }, [id]);
+    }, [id, getUser]);
 
     return (
         <Box display='flex' justifyContent='center' mt={2}>

@@ -18,7 +18,7 @@ function  Login() {
         if (localStorage.getItem('token')) {
             navigate('/Users')
         }
-    }, []);
+    }, [navigate]);
 
     const handleSelectChange = useCallback(event => {
         switch (event.target.name) {
@@ -56,7 +56,7 @@ function  Login() {
                 }
             });
 
-    }, [userData]);
+    }, [userData, navigate]);
 
     return (
         <Box component='form' onSubmit={onSubmitHandler}>

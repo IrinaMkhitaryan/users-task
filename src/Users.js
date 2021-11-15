@@ -47,11 +47,16 @@ function  Users() {
     const getUsers = useCallback((page) => {
         axios.get(`https://reqres.in/api/users?page=${page}`)
             .then(res => {
-                setUsers(res.data.data);
+                const userData = [...res.data.data];
+                userData.forEach(item => {
+                    item.name = item.first_name;
+                    item.job = item.last_name;
+                });
+                setUsers(userData);
                 setCount(res.data.total_pages);
                 setLoading(false);
             });
-    }, [loading]);
+    }, []);
 
     useEffect(() => {
         if (!localStorage.getItem('token')) {
@@ -60,7 +65,7 @@ function  Users() {
             getUsers(page);
         }
 
-    }, []);
+    }, [getUsers, navigate, page]);
 
     const handleChangePage = useCallback((event, currentPage) => {
         setPage(currentPage);
@@ -69,7 +74,7 @@ function  Users() {
 
     const closeDialog = useCallback(() => {
         setOpen(false)
-    },[open]);
+    },[]);
 
     const addUser = useCallback((user) => {
         axios.post(`https://reqres.in/api/users`, user)
@@ -77,21 +82,32 @@ function  Users() {
                 getUsers(page);
                 closeDialog();
             });
-    }, [getUsers, closeDialog]);
+    }, [getUsers, closeDialog, page]);
+
+    const saveUser = useCallback((user) => {
+        axios.put(`https://reqres.in/api/users/${user.id}`, {name: user.name, job: user.job})
+            .then(res => {
+                getUsers(page);
+                closeDialog();
+            });
+    }, [getUsers, closeDialog, page]);
+
     const removeUser = (id) => {
         axios.delete(`https://reqres.in/api/users/${id}`)
             .then(res => {
                 getUsers(page);
             });
     };
-    const openAddDialog = () => {
+
+    const openAddDialog = useCallback(() => {
         setOpen(true);
         setUser({});
-    };
-    const openEditDialog = (user) => {
+    }, []);
+
+    const openEditDialog = useCallback((user) => {
         setUser(user);
         setOpen(true);
-    };
+    }, []);
 
     return (
         <>
@@ -123,7 +139,7 @@ function  Users() {
                                 </TableHead>
                                 <TableBody>
                                     {users.map((row, index) => (
-                                        <TableRow key={row.name}>
+                                        <TableRow key={index}>
                                             <TableCell component="th" scope="row">
                                                 {index}
                                             </TableCell>
@@ -145,10 +161,10 @@ function  Users() {
                     </Box>
                 </Box>
             }
+            <AddEditUserDialog onClose={closeDialog} open={open} addUser={addUser} saveUserChanges={saveUser} editedUser={user}/>
             <Box mt={10} display='flex' justifyContent='center'>
                 <Pagination count={count} shape="rounded" page={page} onChange={handleChangePage}/>
             </Box>
-            <AddEditUserDialog onClose={closeDialog} open={open} addUser={addUser} editedUser={user}/>
         </>
     );
 }

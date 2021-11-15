@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
     Dialog,
     DialogContent,
@@ -13,14 +13,14 @@ function AddEditUserDialog(props) {
         onClose,
         open = false,
         addUser,
-        editedUser
+        editedUser,
+        saveUserChanges
     } = props;
     const [user, setUser]  = useState({});
 
-    useState(() => {
-        setUser(editedUser)
-    }, [editedUser, user, open]);
-
+    useEffect(() => {
+        setUser(editedUser);
+    }, [editedUser]);
     const handleSelectChange = useCallback(event => {
         switch (event.target.name) {
             case 'name':
@@ -42,8 +42,13 @@ function AddEditUserDialog(props) {
         }
     }, [setUser, user]);
 
-    const saveUser = useCallback(() => {
+    const createUser = useCallback(() => {
         addUser(user);
+        setUser({});
+    }, [user, addUser]);
+
+    const saveUser = useCallback(() => {
+        saveUserChanges(user);
         setUser({});
     }, [user]);
 
@@ -71,7 +76,7 @@ function AddEditUserDialog(props) {
                 </Box>
             </DialogContent>
             <DialogActions>
-                <Button color="primary" variant="outlined" onClick={saveUser}>{editedUser.id ? 'Edit' : 'Save'}</Button>
+                <Button color="primary" variant="outlined" onClick={user.id ? saveUser : createUser}>{user.id ? 'Edit' : 'Save'}</Button>
             </DialogActions>
         </Dialog>
     )
